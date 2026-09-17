@@ -1,0 +1,25 @@
+# Local Python environments
+venv/
+.venv/
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+
+# Local analysis output
+waveform_test.png
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Sensitive participant export
+dataset/raw/participants.csv
+
+# Ignore audio and dataset files
+*.wav
+*.mp3
+*.tar.gz
+*.zip
+dataset/
+raw_data/
