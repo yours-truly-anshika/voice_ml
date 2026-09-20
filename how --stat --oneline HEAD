@@ -1,0 +1,51 @@
+[33m2018e4b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Track WAV files with Git LFS
+ .gitattributes | 1 [32m+[m
+ 1 file changed, 1 insertion(+)
+[33mf30c98f[m Add streaming prediction diagnostics
+ analyze_negative_streaming_behavior.py     | 137 [32m+++++++++++++[m
+ analyze_positive_energy.py                 |  45 [32m+++++[m
+ analyze_streaming_runs.py                  | 315 [32m+++++++++++++++++++++++++++++[m
+ compare_training_views.py                  |  42 [32m++++[m
+ compare_val_selection_policies.py          | 315 [32m+++++++++++++++++++++++++++++[m
+ compare_val_windows.py                     |  42 [32m++++[m
+ diagnose_streaming_positive_predictions.py | 289 [32m++++++++++++++++++++++++++[m
+ diagnose_synthetic_unknown_streaming.py    | 245 [32m++++++++++++++++++++++[m
+ extract_val_best_windows.py                |  41 [32m++++[m
+ feature_frontend.py                        |   2 [32m+[m[31m-[m
+ find_streaming_diagnostic_sources.py       |  97 [32m+++++++++[m
+ inspect_metadata_headers.py                |  27 [32m+++[m
+ inspect_negative_dataset_provenance.py     | 112 [32m++++++++++[m
+ inspect_negative_generation_code.py        |  37 [32m++++[m
+ inspect_negative_manifest.py               |  58 [32m++++++[m
+ inspect_negative_source_durations.py       | 101 [32m+++++++++[m
+ inspect_selection_disagreements.py         | 180 [32m+++++++++++++++++[m
+ inspect_synthetic_unknown_sources.py       |  97 [32m+++++++++[m
+ inspect_val_activity.py                    | 168 [32m+++++++++++++++[m
+ inspect_val_center_windows.py              |  63 [32m++++++[m
+ inspect_val_dense_windows.py               |  72 [32m+++++++[m
+ plot_positive_rms.py                       |  50 [32m+++++[m
+ 22 files changed, 2534 insertions(+), 1 deletion(-)
+[33mcb1b5d3[m Add dataset windowing and DSCNN training pipeline
+ .vscode/settings.json                 |   9 [32m+[m
+ check_completion_rms.py               |  24 [32m++[m
+ compare_errors.py                     |  23 [32m++[m
+ endpoint_detection.py                 | 218 [32m++++++++++++++++++[m
+ extract_features.py                   |  82 [32m+++++++[m
+ feature_frontend.py                   |  17 [32m+[m[31m-[m
+ generate_background_windows.py        | 402 [32m++++++++++++++++++++++++++++++++++[m
+ generate_positive_windows.py          | 227 [32m+++++++++++++++++++[m
+ generate_real_unknown_windows.py      | 161 [32m++++++++++++++[m
+ generate_synthetic_unknown_windows.py | 267 [32m++++++++++++++++++++++[m
+ inspect_fn_features.py                |  35 [32m+++[m
+ inspect_fp.py                         |  20 [32m++[m
+ inspect_fp_features.py                |  30 [32m+++[m
+ inspect_positive_participants.py      |  23 [32m++[m
+ inspect_positive_predictions.py       |  27 [32m+++[m
+ inspect_test_errors.py                |  43 [32m++++[m
+ inspect_test_positive_acoustics.py    |  30 [32m+++[m
+ models/dscnn.py                       |  62 [32m++++++[m
+ models/dscnn_best.keras               | Bin [31m0[m -> [32m130027[m bytes
+ pack_dataset.py                       | 102 [32m+++++++++[m
+ train.py                              |  90 [32m++++++++[m
+ verify_real_unknown_padding.py        |  39 [32m++++[m
+ 22 files changed, 1920 insertions(+), 11 deletions(-)

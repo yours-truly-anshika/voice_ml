@@ -23,10 +23,10 @@ def extract_log_mel(audio):
 
     audio = np.asarray(audio, dtype=np.float32)
 
-    # Dataset contract: every input must already be exactly 1 second.
-    if len(audio) != SAMPLE_RATE:
+    # Dataset contract: every input must be exactly 1.0s, 1.5s, or 2.0s
+    if len(audio) not in [16000, 24000, 32000]:
         raise ValueError(
-            f"Expected exactly {SAMPLE_RATE} samples, got {len(audio)}"
+            f"Expected exactly 16000, 24000, or 32000 samples, got {len(audio)}"
         )
 
     mel = librosa.feature.melspectrogram(
