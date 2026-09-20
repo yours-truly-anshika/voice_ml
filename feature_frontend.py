@@ -49,7 +49,7 @@ def extract_log_mel(audio):
     )
 
     # Expected: (40, 49)
-    print("Feature shape:", log_mel.shape)
+    # Feature shape: (40, 49)
 
     return log_mel[..., np.newaxis]
 
