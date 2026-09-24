@@ -14,19 +14,24 @@ FRAME_STEP = int(SAMPLE_RATE * FRAME_STEP_MS / 1000)
 
 N_FFT = 512
 
+SUPPORTED_SAMPLE_COUNTS = (16000, 24000, 32000)
+
 
 def extract_log_mel(audio):
     """
-    Convert 1 second of 16-kHz mono audio into
-    a 40 x 49 x 1 log-Mel feature tensor.
+    Convert supported 16-kHz mono audio into a log-Mel tensor.
+
+    Supported input lengths are 1.0s, 1.5s, and 2.0s, producing
+    feature shapes (40, 49, 1), (40, 74, 1), and (40, 99, 1).
     """
 
     audio = np.asarray(audio, dtype=np.float32)
 
     # Dataset contract: every input must be exactly 1.0s, 1.5s, or 2.0s
-    if len(audio) not in [16000, 24000, 32000]:
+    if len(audio) not in SUPPORTED_SAMPLE_COUNTS:
         raise ValueError(
-            f"Expected exactly 16000, 24000, or 32000 samples, got {len(audio)}"
+            "Expected exactly 16000, 24000, or 32000 samples, "
+            f"got {len(audio)}"
         )
 
     mel = librosa.feature.melspectrogram(
@@ -47,9 +52,6 @@ def extract_log_mel(audio):
         mel,
         ref=np.max
     )
-
-    # Expected: (40, 49)
-    # Feature shape: (40, 49)
 
     return log_mel[..., np.newaxis]
 

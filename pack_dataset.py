@@ -1,8 +1,12 @@
-﻿from pathlib import Path
+﻿import argparse
+from pathlib import Path
 import numpy as np
 
-FEATURE_ROOT = Path("dataset/features")
-OUTPUT_PATH = Path("dataset/features/dataset_features.npz")
+SHAPE_MAP = {
+    1.0: (40, 49, 1),
+    1.5: (40, 74, 1),
+    2.0: (40, 99, 1),
+}
 
 SPLITS = ["train", "val", "test"]
 CLASSES = ["positive", "unknown", "background"]
@@ -20,11 +24,11 @@ def load_files(split, class_name):
     return sorted(directory.glob("*.npy"))
 
 
-def load_feature(path):
+def load_feature(path, expected_shape):
     x = np.load(path)
 
-    if x.shape != (40, 49, 1):
-        raise ValueError(f"{path}: expected (40,49,1), got {x.shape}")
+    if x.shape != expected_shape:
+        raise ValueError(f"{path}: expected {expected_shape}, got {x.shape}")
 
     if x.dtype != np.float32:
         raise ValueError(f"{path}: expected float32, got {x.dtype}")
@@ -35,11 +39,11 @@ def load_feature(path):
     return x
 
 
-def build_split(split, balance=False):
+def build_split(feature_root, expected_shape, split, balance=False):
     rng = np.random.default_rng(SEED)
 
     files_by_class = {
-        c: load_files(split, c)
+        c: sorted((feature_root / split / c).glob("*.npy"))
         for c in CLASSES
     }
 
@@ -62,7 +66,7 @@ def build_split(split, balance=False):
 
     for class_name in CLASSES:
         for path in files_by_class[class_name]:
-            features.append(load_feature(path))
+            features.append(load_feature(path, expected_shape))
             labels.append(LABELS[class_name])
 
     X = np.stack(features).astype(np.float32)
@@ -72,12 +76,33 @@ def build_split(split, balance=False):
 
 
 def main():
-    X_train, y_train = build_split("train", balance=True)
-    X_val, y_val = build_split("val", balance=False)
-    X_test, y_test = build_split("test", balance=False)
+    parser = argparse.ArgumentParser(description="Pack duration-specific features")
+    parser.add_argument(
+        "--duration",
+        type=float,
+        required=True,
+        choices=sorted(SHAPE_MAP),
+        help="Feature duration in seconds",
+    )
+    args = parser.parse_args()
+
+    duration = args.duration
+    expected_shape = SHAPE_MAP[duration]
+    feature_root = Path(f"dataset/features_{duration}s")
+    output_path = feature_root / "dataset_features.npz"
+
+    X_train, y_train = build_split(
+        feature_root, expected_shape, "train", balance=True
+    )
+    X_val, y_val = build_split(
+        feature_root, expected_shape, "val", balance=False
+    )
+    X_test, y_test = build_split(
+        feature_root, expected_shape, "test", balance=False
+    )
 
     np.savez_compressed(
-        OUTPUT_PATH,
+        output_path,
         X_train=X_train,
         y_train=y_train,
         X_val=X_val,
@@ -87,7 +112,8 @@ def main():
     )
 
     print("DATASET PACKING COMPLETE")
-    print("Output:", OUTPUT_PATH)
+    print("Duration:", duration)
+    print("Output:", output_path)
     print()
     print("TRAIN:", X_train.shape, y_train.shape)
     print("VAL:  ", X_val.shape, y_val.shape)

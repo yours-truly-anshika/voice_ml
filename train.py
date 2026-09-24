@@ -1,3 +1,4 @@
+import argparse
 import random
 from pathlib import Path
 
@@ -9,21 +10,45 @@ from models.dscnn import build_dscnn
 
 SEED = 26172
 
-DATASET_PATH = Path("dataset/features/dataset_features.npz")
 MODEL_DIR = Path("models")
-BEST_MODEL_PATH = MODEL_DIR / "dscnn_best.keras"
 
 EPOCHS = 100
 BATCH_SIZE = 32
 LEARNING_RATE = 1e-3
 
+SHAPE_MAP = {
+    1.0: (40, 49, 1),
+    1.5: (40, 74, 1),
+    2.0: (40, 99, 1),
+}
+
 
 def main():
+    parser = argparse.ArgumentParser(description="Train the duration-specific DS-CNN")
+    parser.add_argument(
+        "--duration",
+        type=float,
+        required=True,
+        choices=sorted(SHAPE_MAP),
+        help="Input window duration in seconds",
+    )
+    args = parser.parse_args()
+
+    duration = args.duration
+    input_shape = SHAPE_MAP[duration]
+    dataset_path = Path(f"dataset/features_{duration}s/dataset_features.npz")
+    best_model_path = MODEL_DIR / f"dscnn_{duration}s_best.keras"
+
+    print(f"DURATION: {duration}s")
+    print("INPUT SHAPE:", input_shape)
+    print("DATASET:", dataset_path)
+    print("MODEL OUTPUT:", best_model_path)
+
     random.seed(SEED)
     np.random.seed(SEED)
     tf.random.set_seed(SEED)
 
-    data = np.load(DATASET_PATH)
+    data = np.load(dataset_path)
 
     X_train = data["X_train"]
     y_train = data["y_train"]
@@ -34,7 +59,7 @@ def main():
     print("TRAIN:", X_train.shape, y_train.shape)
     print("VAL:  ", X_val.shape, y_val.shape)
 
-    model = build_dscnn()
+    model = build_dscnn(input_shape=input_shape)
 
     model.compile(
         optimizer=tf.keras.optimizers.Adam(
@@ -55,7 +80,7 @@ def main():
             verbose=1,
         ),
         tf.keras.callbacks.ModelCheckpoint(
-            BEST_MODEL_PATH,
+            best_model_path,
             monitor="val_accuracy",
             mode="max",
             save_best_only=True,
@@ -83,7 +108,7 @@ def main():
     print("TRAINING COMPLETE")
     print("BEST EPOCH:", best_epoch)
     print("BEST VAL ACCURACY:", best_val_accuracy)
-    print("BEST MODEL:", BEST_MODEL_PATH)
+    print("BEST MODEL:", best_model_path)
 
 
 if __name__ == "__main__":
